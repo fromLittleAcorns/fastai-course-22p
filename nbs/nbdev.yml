@@ -1,0 +1,9 @@
+project:
+  output-dir: _docs
+
+website:
+  title: "miniai"
+  site-url: "https://fastai.github.io/fastai-course-22p"
+  description: "copy of the fastai course repository"
+  repo-branch: master
+  repo-url: "https://github.com/fastai/fastai-course-22p"
