@@ -28,10 +28,10 @@ from .activations import *
 from .init import *
 from .sgd import *
 
-# %% ../nbs/13_resnet.ipynb 5
+# %% ../nbs/13_resnet.ipynb 6
 act_gr = partial(GeneralRelu, leak=0.1, sub=0.4)
 
-# %% ../nbs/13_resnet.ipynb 16
+# %% ../nbs/13_resnet.ipynb 17
 def _conv_block(ni, nf, stride, ks=3, act=act_gr, norm=None):
     """ Note that the architectual choice being made here is that the first conv does the re-scaling
     and the second keeps the number of channels the same but reduces the resolution by using stride=2

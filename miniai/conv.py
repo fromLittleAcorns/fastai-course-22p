@@ -32,14 +32,15 @@ def conv(
 # Set device according to the availability of gpus
 #def_device = "mps" if torch.backends.mps.is_available() else "cuda" if torch.backends.cuda.is_available() \
 #    else "cpu"
-def_device = "cpu" if torch.backends.mps.is_available() else "cuda" if torch.backends.cuda.is_available() \
+def_device = "cpu" if torch.backends.mps.is_available() else "cuda" if torch.cuda.is_available() \
     else "cpu"
 
-def to_device(x, dev=def_device):
+def to_device(x, device=def_device):
     # if x is a mapping then each of mapping targets needs to be moved to the device.  Needed to accomodate
     # huggingface examples.  Note also that the applications of type(x) prior to the (o.to(dev) for o in x)
     # results in the recreation of the tuple or list from the second part, which is a generator.
-    if isinstance(x, Mapping): return {k: v.to_device(dev) for k, v in x.items()}
-    return type(x)(o.to(dev) for o in x)
+    if isinstance(x, torch.Tensor): return x.to(device)
+    if isinstance(x, Mapping): return {k: v.to_device(device) for k, v in x.items()}
+    return type(x)(o.to(device) for o in x)
 
 def collate_device(b): return to_device(default_collate(b))
