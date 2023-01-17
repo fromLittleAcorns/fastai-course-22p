@@ -38,13 +38,10 @@ def collate_dict(ds):
 
 # %% ../nbs/05_Datasets_and_Plotting.ipynb 62
 @fc.delegates(plt.Axes.imshow)
-def show_image(img, ax=None, title=None, with_frame=False, figsize=None, **kwargs):
-    # Check if axis supplied and if not create
-    if ax is None:
-        _, ax = plt.subplots(figsize=figsize)
+def show_image(img, ax=None, title=None, noframe=True, figsize=None, **kwargs):
     # prepare images.  Check if pytorch tensor by using attributes
-    if fc.hasattrs(img, ('cpu', 'permute')):
-        img = img.cpu()
+    if fc.hasattrs(img, ('cpu', 'permute', 'detach')):
+        img = img.detach().cpu()
         if len(img.shape)==3 and img.shape[0]<8:
             img = img.permute(1,2,0)
         elif not isinstance(img, np.ndarray):
@@ -52,6 +49,8 @@ def show_image(img, ax=None, title=None, with_frame=False, figsize=None, **kwarg
     # If only one channel remove the dimension
     if img.shape[-1] == 1:
         img = img[...,0]
+    # if axes do not exist then create them
+    if ax is None: _,ax = plt.subplots(figsize=figsize)
     # plot the array
     ax.imshow(img, **kwargs)
     # Add a title
@@ -60,12 +59,9 @@ def show_image(img, ax=None, title=None, with_frame=False, figsize=None, **kwarg
     ax.set_xticks([])
     ax.set_yticks([])
     # Finally set whether or not to show a frame
-    if with_frame==True:
-        ax.axis('on')
-    else:
+    if noframe:
         ax.axis('off')
     return ax
-    
 
 # %% ../nbs/05_Datasets_and_Plotting.ipynb 69
 @fc.delegates(plt.subplots, keep=True)
@@ -120,26 +116,32 @@ def get_grid(
     else:
         nrows = int(np.ceil(math.sqrt(n)))
         ncols = int(np.ceil(n/nrows))
+    _ = kwargs.pop('cmap', None)
+    # Avoid passing cmap to subplots
     fig, axs = subplots(nrows, ncols, **kwargs)
     # Turn of the display of axis
     for i in range(n, nrows*ncols): axs.flat[i].set_axis_off()
     # Add the title if necessary
-    if title: fig.suptitle(title, weight=weight, size=size)
+    if title: 
+        fig.suptitle(title, weight=weight, size=size)
     return fig, axs
 
 # %% ../nbs/05_Datasets_and_Plotting.ipynb 79
 @fc.delegates(subplots)
 def show_images(
     imgs: list, # List of images to show
-    nrows: int=None, # Number of rows
+    nrows: int=1, # Number of rows
     ncols: int=None, # Number of columns
     titles: str=None, # Plot title, optional, list of titles for each image
     **kwargs
 ):
     # Create a grid of axes ready to plot the images
-    axs = get_grid(len(imgs), nrows, ncols, **kwargs)[1].flat
-    
+    axs = get_grid(len(imgs), **kwargs)[1].flat
+    # import pdb; pdb.set_trace()
+    # Remove unwanted kwargs
+    _ = kwargs.pop('imsize', None)
+    _ = kwargs.pop('title', None)
     # plot images and individual labels
-    for img, t, ax in zip_longest(imgs, titles or [], axs):
-        show_image(img, ax, t)
+    for img, t, ax in zip_longest(imgs, titles or [], axs[:len(imgs)]):
+        show_image(img, ax, t, **kwargs)
     
