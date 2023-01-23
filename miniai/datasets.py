@@ -19,6 +19,10 @@ __all__ = ['inplace', 'collate_dict', 'show_image', 'subplots', 'get_grid', 'sho
 
 # %% ../nbs/05_Datasets_and_Plotting.ipynb 36
 def inplace(f):
+    """ This function allows a function that does not return anything directly (ie one that modifies things
+    without a return statenent) to then be used in an application that required a return.  Do this function
+    is a wrapper of another function that simply executes the function and then returns the modified input
+    """
     def _f(b):
         f(b)
         return b
