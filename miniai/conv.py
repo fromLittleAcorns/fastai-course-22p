@@ -41,6 +41,6 @@ def to_device(x, device=def_device):
     # results in the recreation of the tuple or list from the second part, which is a generator.
     if isinstance(x, torch.Tensor): return x.to(device)
     if isinstance(x, Mapping): return {k: v.to_device(device) for k, v in x.items()}
-    return type(x)(o.to(device) for o in x)
+    return type(x)(to_device(o, device) for o in x)
 
 def collate_device(b): return to_device(default_collate(b))
