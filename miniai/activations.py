@@ -63,18 +63,26 @@ class Hooks(list):
 
 # %% ../nbs/10_Activations.ipynb 49
 class HooksCallback(Callback):
-    def __init__(self, hookfunc, module_filter=fc.noop):
+    def __init__(self, hookfunc, module_filter=fc.noop, on_train=True, on_valid=False, 
+                mods=None):
+        """ mods should be a set of layers to which hooks should be applied.  If mods
+        is supplied then module_filter is not used.
+        """
         fc.store_attr()
         super().__init__()
     
     def before_fit(self, learn): 
-        # get list of filtered layers
-        filt_layers = fc.filter_ex(learn.model.modules(), self.module_filter)
+        if self.mods:
+            mods = self.mods
+        else:
+            # get list of filtered layers
+            mods = fc.filter_ex(learn.model.modules(), self.module_filter)
         # create hooks
-        self.hooks = Hooks(filt_layers, partial(self._hookfunc, learn))
+        self.hooks = Hooks(mods, partial(self._hookfunc, learn))
     
     def _hookfunc(self, learn, *args, **kwargs):
-        if learn.training: self.hookfunc(*args, **kwargs)
+        if (self.on_train and learn.training) or \
+            (self.on_valid and not learn.training): self.hookfunc(*args, **kwargs)
     
     def after_fit(self, learn): self.hooks.remove()
     
