@@ -41,8 +41,8 @@ def _conv_block(ni, nf, stride, ks=3, act=act_gr, norm=None):
     
     """
     return nn.Sequential(
-        conv(ni, nf, stride=1, ks=3, act=act, norm=norm),
-        conv(nf, nf, stride=stride, ks=3, act=None, norm=norm)
+        conv(ni, nf, stride=1, ks=ks, act=act, norm=norm),
+        conv(nf, nf, stride=stride, ks=ks, act=None, norm=norm)
     )
 
 class ResBlock(nn.Module):
@@ -57,5 +57,5 @@ class ResBlock(nn.Module):
         self.act = act()
         
     def forward(self, x):
-        return self.act(self.convs(x)) + self.idconv(self.pool(x))
+        return self.act(self.convs(x) + self.idconv(self.pool(x)))
     
